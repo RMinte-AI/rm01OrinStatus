@@ -1,0 +1,87 @@
+            break;
+            
+        case WEBSOCKET_EVENT_DATA:
+            if (data->data_len > 0 && data->data_ptr != NULL) {
+                char *msg = strndup(data->data_ptr, data->data_len);
+                if (msg != NULL) {
+                    ESP_LOGD(TAG, "WS recv: %s", msg);
+                    
+                    /* 处理 Socket.IO 消息 */
+                    if (strcmp(msg, "3probe") == 0) {
+                        /* Probe 响应，发送 upgrade */
+                        ESP_LOGI(TAG, "Got probe response, sending upgrade");
+                        esp_websocket_client_send_text(s_ctx->ws_client,
+                                                       SOCKETIO_UPGRADE_MESSAGE,
+                                                       strlen(SOCKETIO_UPGRADE_MESSAGE),
+                                                       portMAX_DELAY);
+                        s_ctx->upgrade_complete = true;
+                        s_ctx->connected_since = esp_timer_get_time();
+                        s_ctx->last_message_time = esp_timer_get_time();  /* 初始化心跳时间 */
+                        set_status(TS_COMPUTE_STATUS_CONNECTED);
+                        ESP_LOGI(TAG, "Socket.IO upgrade complete");
+                    }
+                    else if (strcmp(msg, SOCKETIO_PING_MESSAGE) == 0) {
+                        /* Ping 消息，回复 Pong */
+                        ESP_LOGD(TAG, "Socket.IO ping received, sending pong");
+                        esp_websocket_client_send_text(s_ctx->ws_client,
+                                                       SOCKETIO_PONG_MESSAGE,
+                                                       strlen(SOCKETIO_PONG_MESSAGE),
+                                                       portMAX_DELAY);
+                        s_ctx->last_message_time = esp_timer_get_time();  /* 更新心跳时间 */
+                    }
+                    else if (strncmp(msg, SOCKETIO_MESSAGE_PREFIX, 2) == 0) {
+                        /* 事件消息 42["event", data] */
+                        char *json_start = strchr(msg, '[');
+                        if (json_start != NULL) {
+                            cJSON *array = cJSON_Parse(json_start);
+                            if (array != NULL && cJSON_IsArray(array)) {
+                                cJSON *event_name = cJSON_GetArrayItem(array, 0);
+                                cJSON *event_data_json = cJSON_GetArrayItem(array, 1);
+                                
+                                if (event_name != NULL && 
+                                    cJSON_IsString(event_name) &&
+                                    strcmp(event_name->valuestring, "tegrastats_update") == 0 &&
+                                    event_data_json != NULL) {
+                                    
+                                    ts_compute_data_t agx_data;
+                                    memset(&agx_data, 0, sizeof(agx_data));
+                                    
+                                    if (parse_tegrastats_data(
+                                            cJSON_Print(event_data_json), 
+                                            &agx_data) == ESP_OK) {
+                                        
+                                        /* 更新数据 */
+                                        agx_data.is_valid = true;
+                                        agx_data.update_time_us = esp_timer_get_time();
+                                        
+                                        if (xSemaphoreTake(s_ctx->data_mutex, 
+                                                          pdMS_TO_TICKS(100)) == pdTRUE) {
+                                            memcpy(&s_ctx->latest_data, &agx_data, 
+                                                   sizeof(ts_compute_data_t));
+                                            xSemaphoreGive(s_ctx->data_mutex);
+                                        }
+                                        
+                                        s_ctx->messages_received++;
+                                        s_ctx->last_message_time = esp_timer_get_time();
+                                        
+                                        /* 更新温度源 */
+                                        update_temp_source(&agx_data);
+                                        
+                                        /* 发布事件 */
+                                        publish_data_event(&agx_data);
+                                        
+                                        ESP_LOGD(TAG, "AGX data: CPU=%.1f°C, RAM=%lu/%luMB",
+                                                 agx_data.temperature.cpu,
+                                                 agx_data.memory.ram.used_mb,
+                                                 agx_data.memory.ram.total_mb);
+                                    } else {
+                                        s_ctx->parse_errors++;
+                                    }
+                                }
+                                cJSON_Delete(array);
+                            }
+                        }
+                    }
+                    free(msg);
+                }
+            }

@@ -92,6 +92,8 @@ class TegrastatsServer:
         # Data update thread
         self._update_thread: Optional[threading.Thread] = None
         self._running = False
+        self._shutdown_requested = False
+        self._shutdown_deferred = False
         
         logger.info("Tegrastats API服务器已初始化")
     
@@ -105,65 +107,71 @@ class TegrastatsServer:
                 'status': 'healthy',
                 'service': 'tegrastats-api',
                 'timestamp': datetime.utcnow().isoformat() + 'Z',
-                'connected_clients': self.limiter.get_count()
+                'connected_clients': self.limiter.get_count(),
+                'telemetry_meta': self.parser.get_snapshot()[1]
             })
         
         @self.app.route('/api/status', methods=['GET'])
         def status():
             """Get complete system status."""
-            data = self.parser.get_current_status()
+            data, meta = self.parser.get_snapshot()
             if not data:
-                return jsonify({'error': 'No data available'}), 503
+                return jsonify({'error': 'No data available', 'telemetry_meta': meta}), 503
             
             # Add timestamp in ISO format
             data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+            data['telemetry_meta'] = meta
             return jsonify(data)
         
         @self.app.route('/api/cpu', methods=['GET'])
         def cpu():
             """Get CPU information."""
-            data = self.parser.get_current_status()
+            data, meta = self.parser.get_snapshot()
             if not data or 'cpu' not in data:
-                return jsonify({'error': 'CPU data not available'}), 503
+                return jsonify({'error': 'CPU data not available', 'telemetry_meta': meta}), 503
             
             return jsonify({
                 'cpu': data['cpu'],
+                'telemetry_meta': meta,
                 'timestamp': datetime.utcnow().isoformat() + 'Z'
             })
         
         @self.app.route('/api/memory', methods=['GET'])
         def memory():
             """Get memory information."""
-            data = self.parser.get_current_status()
+            data, meta = self.parser.get_snapshot()
             if not data or 'memory' not in data:
-                return jsonify({'error': 'Memory data not available'}), 503
+                return jsonify({'error': 'Memory data not available', 'telemetry_meta': meta}), 503
             
             return jsonify({
                 'memory': data['memory'],
+                'telemetry_meta': meta,
                 'timestamp': datetime.utcnow().isoformat() + 'Z'
             })
         
         @self.app.route('/api/temperature', methods=['GET'])
         def temperature():
             """Get temperature information."""
-            data = self.parser.get_current_status()
+            data, meta = self.parser.get_snapshot()
             if not data or 'temperature' not in data:
-                return jsonify({'error': 'Temperature data not available'}), 503
+                return jsonify({'error': 'Temperature data not available', 'telemetry_meta': meta}), 503
             
             return jsonify({
                 'temperature': data['temperature'],
+                'telemetry_meta': meta,
                 'timestamp': datetime.utcnow().isoformat() + 'Z'
             })
         
         @self.app.route('/api/power', methods=['GET'])
         def power():
             """Get power information."""
-            data = self.parser.get_current_status()
+            data, meta = self.parser.get_snapshot()
             if not data or 'power' not in data:
-                return jsonify({'error': 'Power data not available'}), 503
+                return jsonify({'error': 'Power data not available', 'telemetry_meta': meta}), 503
             
             return jsonify({
                 'power': data['power'],
+                'telemetry_meta': meta,
                 'timestamp': datetime.utcnow().isoformat() + 'Z'
             })
         
@@ -226,10 +234,11 @@ class TegrastatsServer:
             try:
                 if self.limiter.get_count() > 0:
                     # Send tegrastats data
-                    data = self.parser.get_current_status()
+                    data, meta = self.parser.get_snapshot()
                     if data:
                         # Add timestamp
                         data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+                        data['telemetry_meta'] = meta
                         
                         # Emit to all connected clients
                         self.socketio.emit('tegrastats_update', data)
@@ -250,12 +259,20 @@ class TegrastatsServer:
     
     def start(self) -> None:
         """Start the server components."""
+        previous = self._shutdown_deferred
+        self._shutdown_deferred = True
         try:
+            if self._shutdown_requested:
+                return
             # Start tegrastats parser
             self.parser.start()
+            if self._shutdown_requested:
+                return
             
             # Start model monitor
             self.model_monitor.start()
+            if self._shutdown_requested:
+                return
             
             # Start data update thread
             self._running = True
@@ -268,9 +285,24 @@ class TegrastatsServer:
             logger.error(f"启动服务器组件失败: {e}")
             self.stop()
             raise
+        finally:
+            self._shutdown_deferred = previous
+
+    def request_shutdown(self) -> bool:
+        """Signal-safe intent only; return whether the blocking run may unwind."""
+        self._shutdown_requested = True
+        return not self._shutdown_deferred
     
     def stop(self) -> None:
         """Stop the server components."""
+        previous = self._shutdown_deferred
+        self._shutdown_deferred = True
+        try:
+            self._stop_components()
+        finally:
+            self._shutdown_deferred = previous
+
+    def _stop_components(self) -> None:
         logger.info("正在停止服务器...")
         
         # Stop data update thread
@@ -293,10 +325,10 @@ class TegrastatsServer:
         Args:
             **kwargs: Additional arguments for SocketIO.run()
         """
-        # Start components
-        self.start()
-        
         try:
+            self.start()
+            if self._shutdown_requested:
+                return
             # Configure logging
             logging.basicConfig(
                 level=getattr(logging, self.config.log_level),

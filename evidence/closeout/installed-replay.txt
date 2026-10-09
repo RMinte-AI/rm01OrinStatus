@@ -1,0 +1,119 @@
+WARNING: The directory '/Users/massif/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing /Users/massif/rm01OrinStatus/evidence/ws-data/wheel/tegrastats_api-1.0.1-py3-none-any.whl
+Installing collected packages: tegrastats-api
+Successfully installed tegrastats-api-1.0.1
+........................................................................ [ 65%]
+......................................                                   [100%]
+=============================== warnings summary ===============================
+tests/offline/test_data.py::test_baseline_counterexamples
+tests/offline/test_data.py::test_baseline_counterexamples
+tests/offline/test_data.py::test_http_baseline_normal_fields
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:119: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_baseline_counterexamples
+tests/offline/test_data.py::test_baseline_counterexamples
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:232: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_baseline_counterexamples
+tests/offline/test_data.py::test_baseline_counterexamples
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/model_monitor.py:393: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_empty_failure_and_health
+tests/offline/test_data.py::test_empty_failure_and_health
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:109: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z',
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:122: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:131: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:136: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:143: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:149: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:155: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:162: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+  /private/var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/evidence/ws-data/baseline/server.py:167: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_http_baseline_normal_fields
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:175: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:198: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'timestamp': datetime.utcnow().isoformat() + 'Z'
+
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+tests/offline/test_data.py::test_real_http_socketio_repeats_models_and_slow_send
+  /var/folders/88/hzsgvlyj5xzghddxy9rk5_5m0000gn/T/ws-data-review-f3c1t52a/installed/tegrastats_api/server.py:240: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+110 passed, 39 warnings in 13.97s
+{
+  "resource_checks": "passed",
+  "client_harness": "passed",
+  "sizes": {
+    "normal_before_bytes": 780,
+    "normal_after_bytes": 1136,
+    "representative": [
+      {
+        "limit": 4096,
+        "last_below_bytes": 4081,
+        "first_at_or_above_bytes": 4141,
+        "synthetic_rails": 50
+      },
+      {
+        "limit": 8192,
+        "last_below_bytes": 8160,
+        "first_at_or_above_bytes": 8219,
+        "synthetic_rails": 118
+      }
+    ],
+    "below_limit_fragment_replay_passed": true,
+    "over_limit_truncation_observed_in_host_replay": true,
+    "normal_increment_bytes": 356
+  }
+}
+Offline wheel replay passed. No device, service or live collector was started.

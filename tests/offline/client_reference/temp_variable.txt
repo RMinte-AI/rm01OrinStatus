@@ -1,0 +1,46 @@
+static bool read_fresh_variable_float(const char *name, int64_t now, double *value,
+                                      int64_t *last_update_ms, bool try_lock)
+{
+    ts_variable_info_t var = {0};
+    double temp_c = 0.0;
+    esp_err_t ret;
+
+    if (!name || !value) {
+        return false;
+    }
+
+    ret = try_lock ? ts_variable_get_info_try(name, &var)
+                   : ts_variable_get_info(name, &var);
+    if (ret != ESP_OK) {
+        return false;
+    }
+
+    if (var.last_update_ms <= 0) {
+        return false;
+    }
+
+    int64_t age = now - var.last_update_ms;
+    if (age < 0 || age > TS_TEMP_DATA_TIMEOUT_MS) {
+        return false;
+    }
+    if (last_update_ms) {
+        *last_update_ms = var.last_update_ms;
+    }
+
+    switch (var.value.type) {
+        case TS_AUTO_VAL_FLOAT:
+            temp_c = var.value.float_val;
+            break;
+        case TS_AUTO_VAL_INT:
+            temp_c = (double)var.value.int_val;
+            break;
+        default:
+            return false;
+    }
+
+    if (temp_c < (TS_TEMP_MIN_VALID / 10.0) ||
+        temp_c > (TS_TEMP_MAX_VALID / 10.0)) {
+        return false;
+    }
+
+    *value = temp_c;

@@ -214,7 +214,7 @@ config = Config(
     log_level='INFO',           # 日志级别
     max_connections=10,         # 最大WebSocket连接数
     update_interval=1.0,        # 数据更新间隔(秒)
-    tegrastats_interval=1.0,    # tegrastats采样间隔(秒)
+    tegrastats_interval=1000,   # tegrastats采样间隔(毫秒；默认1000)
     cors_origins='*'            # CORS允许的源
 )
 ```
@@ -309,3 +309,5 @@ conda env remove -n your-env-name
 ---
 
 **注意**: 本软件需要在NVIDIA Jetson设备上运行以获得完整功能。在其他设备上可以安装和运行，但无法获取真实的系统监控数据。
+
+CLI启动和config预览现在读取项目既有环境变量，显式CLI选项优先于环境。采集间隔是毫秒，推送间隔是秒；不要将采集数值乘1000。--no-debug可覆盖环境true。配置及手动部署前核对规则见WS_DATA_V1.md及交付收尾报告。

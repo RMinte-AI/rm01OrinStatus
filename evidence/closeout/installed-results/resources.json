@@ -1,0 +1,43 @@
+{
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "python": "3.12.3",
+  "baseline": {
+    "frames_per_trial": 10000,
+    "trials": 3,
+    "us_per_frame": [
+      49.118695899960585,
+      49.178662500025894,
+      48.941408299970135
+    ],
+    "median_us": 49.118695899960585
+  },
+  "candidate": {
+    "frames_per_trial": 10000,
+    "trials": 3,
+    "us_per_frame": [
+      70.63646249998783,
+      70.55027090000294,
+      70.62765420000687
+    ],
+    "median_us": 70.62765420000687
+  },
+  "increment_median_us": 21.508958300046288,
+  "memory": [
+    {
+      "total_frames": 1000,
+      "retained_bytes": 1843,
+      "peak_bytes": 8861
+    },
+    {
+      "total_frames": 6000,
+      "retained_bytes": 2151,
+      "peak_bytes": 9169
+    },
+    {
+      "total_frames": 16000,
+      "retained_bytes": 2427,
+      "peak_bytes": 9445
+    }
+  ],
+  "retained_growth_bytes": 584
+}

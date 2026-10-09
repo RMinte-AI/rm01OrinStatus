@@ -1,0 +1,49 @@
+{
+  "TianshanOS_commit": "050757bb8046206797804ba5edc110ae3244bf17",
+  "files": {
+    "parse_tegrastats_data.inc": {
+      "origin": "components/ts_drivers/src/ts_compute_monitor.c:863-980",
+      "sha256": "76796e275d8540bfd5cf27e3268043a13a6ab2cf6eefca7285209f992524b3b8"
+    },
+    "compute_types.inc": {
+      "origin": "components/ts_drivers/include/ts_compute_monitor.h:90-164",
+      "sha256": "d6dc6f1d8d333deff070d6dd58fd1e5564a73a7dc3de7cdd4a7c6316e7a0742b"
+    },
+    "ts_jsonpath.c": {
+      "origin": "components/ts_jsonpath/src/ts_jsonpath.c",
+      "sha256": "8868184035eb7d0da79ad399b95b72050874a015768b77196f9b6c1b5672af18"
+    },
+    "ts_jsonpath.h": {
+      "origin": "components/ts_jsonpath/include/ts_jsonpath.h",
+      "sha256": "88793134aeb48f2a2d659123e9f76400e204fa0504c68d49f91e11d7702c3ef1"
+    },
+    "cJSON.c": {
+      "origin": "ESP-IDF v5.5.2 components/json/cJSON/cJSON.c; host JSON library, not device firmware claim",
+      "sha256": "298581a04a36c0165da4b0aade235c23088cb2faa58651d720ea2f3706ed0b0d"
+    },
+    "cJSON.h": {
+      "origin": "ESP-IDF v5.5.2 components/json/cJSON/cJSON.h; host JSON library, not device firmware claim",
+      "sha256": "25b0145150d500498e4d209cec69c18c42cf818bffcc54690be3b895a2a16dee"
+    },
+    "source_mapping.txt": {
+      "origin": "TianshanOS source lines 1119-1162; named original files in README",
+      "sha256": "40b4a7fbea39c56e77c14e880730d8b41d83306dac46044b15dbdee310e505c5"
+    },
+    "source_socketio.txt": {
+      "origin": "TianshanOS source lines 2198-2359; named original files in README",
+      "sha256": "91e74164db94f076c9674993afa3c736074ea0d3e727b7e4e036a823bd175154"
+    },
+    "compute_receiver.txt": {
+      "origin": "TianshanOS source lines 760-846; named original files in README",
+      "sha256": "122bca5508caf7ed8a12dd74bb6afb5e8eedc8e99e7636a8b84c86f21f42124d"
+    },
+    "temp_variable.txt": {
+      "origin": "TianshanOS source lines 170-215; named original files in README",
+      "sha256": "6aeae76044c109f2ea811c6a7737d2ff72d751bcd0655a5329c9852a9c9318d3"
+    },
+    "limits.json": {
+      "origin": "ts_source_manager.c:117,2585; ts_compute_monitor.c:1021,762-845",
+      "sha256": "ea2eceddb013797da35e59875a3189e218eac4bf44481602348dc0f48e2b80b2"
+    }
+  }
+}

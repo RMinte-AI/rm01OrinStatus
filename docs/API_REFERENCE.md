@@ -356,7 +356,7 @@ config = Config(
     log_level='INFO',
     max_connections=10,
     update_interval=1.0,
-    tegrastats_interval=1.0,
+    tegrastats_interval=1000,
     cors_origins='*'
 )
 ```
@@ -368,7 +368,7 @@ config = Config(
 - `log_level`: 日志级别
 - `max_connections`: 最大WebSocket连接数
 - `update_interval`: 数据更新间隔
-- `tegrastats_interval`: tegrastats采样间隔
+- `tegrastats_interval`: tegrastats采样间隔，正整数毫秒，默认1000；整数等值输入1000.0归一化为1000
 - `cors_origins`: CORS允许的源
 
 ## CLI命令
@@ -394,11 +394,13 @@ tegrastats-api run [OPTIONS]
 **选项**:
 - `-h, --host TEXT`: 绑定IP地址
 - `-p, --port INTEGER`: 绑定端口
-- `--debug`: 启用调试模式
+- `--debug / --no-debug`: 显式开/关调试；未传保留环境值，同时传入时最后一个生效
 - `--log-level [DEBUG|INFO|WARNING|ERROR]`: 日志级别
 - `--max-connections INTEGER`: 最大WebSocket连接数
 - `--update-interval FLOAT`: 数据更新间隔(秒)
-- `--tegrastats-interval FLOAT`: Tegrastats采样间隔(秒)
+- `--tegrastats-interval TEXT`: Tegrastats采样间隔(正整数毫秒，1000.0等整数等值输入可接受)
+
+采集间隔按既有实际透传值解释为毫秒，不乘1000。原帮助中的“秒”标注已纠正；`--update-interval`仍以秒为单位。小数毫秒、零、负数和非有限值明确拒绝。
 
 **示例**:
 ```bash
@@ -568,3 +570,5 @@ tegrastats-api monitor --duration 30
 ---
 
 更多信息请参考 [安装指南](INSTALL_GUIDE.md) 和项目README。
+
+启动和config预览使用相同优先级：显式CLI > 主环境变量 > 既有旧别名 > 默认；先选定再校验。配置来源与消费者边界见[WS_DATA_V1.md](WS_DATA_V1.md)。环境值现在真正参与CLI启动，部署前核对服务环境。
