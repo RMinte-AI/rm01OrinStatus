@@ -1,0 +1,1 @@
+{"automation_receive_chunk": 2048, "automation_reassembly": 8192, "compute_receive_chunk": 4096, "compute_reassembly": false}

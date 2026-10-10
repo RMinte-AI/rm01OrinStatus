@@ -1,0 +1,9 @@
+{
+  "commit": "4a765acc2ffe2a46135851f7b225c2856336cb9f",
+  "initial_status": "",
+  "sha256": {
+    "src/tegrastats_api/parser.py": "ebff46ff7f1fd68da614f6f80df5fd0b2cd8c1d64ec1d2592735bb5515e42c3b",
+    "src/tegrastats_api/server.py": "400610417aea88a0776e9272dc101f29c1186b8302b01e338528f96df190104a",
+    "pyproject.toml": "95aebe5a2b8f27fb7f543affac2b8faa9360149767f4d221f4fce38e35ad3d13"
+  }
+}

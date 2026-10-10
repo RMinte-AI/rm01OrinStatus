@@ -1,0 +1,44 @@
+static int process_source_mappings(ts_auto_source_t *src, cJSON *json_data)
+{
+    if (!src || !json_data) {
+        return 0;
+    }
+
+    int processed = 0;
+
+    // 遍历所有映射
+    for (uint8_t i = 0; i < src->mapping_count && i < TS_AUTO_MAX_MAPPINGS; i++) {
+        ts_auto_mapping_t *mapping = &src->mappings[i];
+
+        // 跳过空映射
+        if (mapping->json_path[0] == '\0' || mapping->var_name[0] == '\0') {
+            continue;
+        }
+
+        // 使用 JSONPath 提取值
+        cJSON *result = ts_jsonpath_get(json_data, mapping->json_path);
+        if (!result) {
+            ESP_LOGD(TAG, "Mapping %d: path '%s' not found", i, mapping->json_path);
+            continue;
+        }
+
+        // 如果结果是数组或对象，递归展开为多个变量
+        if (cJSON_IsArray(result) || cJSON_IsObject(result)) {
+            // 使用 auto_discover 函数来展开，变量名前缀为 mapping->var_name
+            int expanded = auto_discover_json_fields(src, result, mapping->var_name, 3, true);
+            ESP_LOGD(TAG, "Mapping %d: expanded '%s' into %d variables", 
+                     i, mapping->json_path, expanded);
+            processed += expanded;
+            cJSON_Delete(result);
+            continue;
+        }
+
+        // 转换为 ts_auto_value_t（仅处理叶子节点）
+        ts_auto_value_t value = {0};
+        cjson_to_value(result, &value);
+        cJSON_Delete(result);  // ts_jsonpath_get 返回副本，需要释放
+
+        // 尝试更新变量
+        esp_err_t ret = ts_variable_set(mapping->var_name, &value);
+        
+        // 如果变量不存在，自动创建

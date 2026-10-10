@@ -9,20 +9,31 @@ from typing import Optional
 
 import click
 
-from .config import Config
+from .config import Config, normalize_tegrastats_interval
 from .server import TegrastatsServer
 
 
 # Global server instance for signal handling
 _server_instance: Optional[TegrastatsServer] = None
+_exit_requested = False
 
 
 def signal_handler(signum, frame):
-    """Handle shutdown signals."""
-    if _server_instance:
-        print("\n正在关闭服务器...")
-        _server_instance.stop()
-    sys.exit(0)
+    """Request exit; never acquire cleanup locks from a signal handler."""
+    global _exit_requested
+    _exit_requested = True
+    if _server_instance and _server_instance.request_shutdown():
+        # Wake the blocking server loop. Its finally owns normal cleanup.
+        raise SystemExit(0)
+
+
+def _interval_ms(ctx, param, value):
+    if value is None:
+        return None
+    try:
+        return normalize_tegrastats_interval(value)
+    except ValueError as error:
+        raise click.BadParameter(str(error), ctx=ctx, param=param)
 
 
 @click.group()
@@ -32,44 +43,58 @@ def cli():
     pass
 
 
+def _config_options(function):
+    options = [
+        click.option('--host', '-h', default=None, help='绑定IP地址'),
+        click.option('--port', '-p', type=int, default=None, help='绑定端口'),
+        click.option('--debug/--no-debug', default=None, help='显式启用/关闭调试；同时提供时最后一个生效'),
+        click.option('--log-level', default=None, type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR'], case_sensitive=False), help='日志级别'),
+        click.option('--max-connections', type=int, default=None, help='最大WebSocket连接数'),
+        click.option('--update-interval', type=float, default=None, help='推送间隔(有限正数秒)'),
+        click.option('--tegrastats-interval', type=str, callback=_interval_ms, default=None, help='采集间隔(正整数毫秒；1000.0等整数等值可接受)'),
+    ]
+    for option in reversed(options):
+        function = option(function)
+    return function
+
+
+def _resolve_config(options):
+    try:
+        return Config.resolve({key: value for key, value in options.items() if value is not None})
+    except ValueError as error:
+        raise click.ClickException(str(error))
+
+
+def _show_config(config):
+    for name, label, unit in (("host", "监听主机", ""), ("port", "监听端口", ""),
+                             ("tegrastats_interval", "采集间隔", " ms"),
+                             ("update_interval", "推送间隔", " s"),
+                             ("debug", "debug", ""), ("max_connections", "最大连接数", ""),
+                             ("log_level", "日志级别", ""),
+                             ("allow_unsafe_werkzeug", "allow_unsafe_werkzeug", "")):
+        click.echo("%s：%s%s（来源：%s）" % (label, getattr(config, name), unit, config.sources[name]))
+    click.echo("数据过期界限：%s ms" % config.freshness_timeout_ms)
+    click.echo("CORS：已配置，传入CORS/Socket.IO（来源：%s）" % config.sources['cors_origins'])
+    click.echo("文件日志：未接线，不代表正在写文件（来源：%s）" % config.sources['log_file'])
+
+
 @cli.command()
-@click.option('--host', '-h', default=None, help='绑定IP地址')
-@click.option('--port', '-p', type=int, default=None, help='绑定端口')
-@click.option('--debug', is_flag=True, default=False, help='启用调试模式')
-@click.option('--log-level', default=None, 
-              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR'], case_sensitive=False),
-              help='日志级别')
-@click.option('--max-connections', type=int, default=None, help='最大WebSocket连接数')
-@click.option('--update-interval', type=float, default=None, help='数据更新间隔(秒)')
-@click.option('--tegrastats-interval', type=float, default=None, help='Tegrastats采样间隔(秒)')
-def run(host, port, debug, log_level, max_connections, update_interval, tegrastats_interval):
+@_config_options
+def run(**options):
     """启动Tegrastats API服务器。"""
-    global _server_instance
-    
-    # Create configuration
-    config = Config()
-    
-    # Override config with command line arguments
-    if host is not None:
-        config.host = host
-    if port is not None:
-        config.port = port
-    if debug:
-        config.debug = debug
-    if log_level is not None:
-        config.log_level = log_level.upper()
-    if max_connections is not None:
-        config.max_connections = max_connections
-    if update_interval is not None:
-        config.update_interval = update_interval
-    if tegrastats_interval is not None:
-        config.tegrastats_interval = tegrastats_interval
-    
+    global _server_instance, _exit_requested
+    _server_instance = None
+    _exit_requested = False
+    config = _resolve_config(options)
+    click.echo("最终启动配置：")
+    _show_config(config)
+
     # Setup logging
     logging.basicConfig(
         level=getattr(logging, config.log_level),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    logging.getLogger().setLevel(config.log_level)
     
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)
@@ -78,10 +103,16 @@ def run(host, port, debug, log_level, max_connections, update_interval, tegrasta
     # Create and run server
     try:
         _server_instance = TegrastatsServer(config)
+        if _exit_requested:
+            _server_instance.request_shutdown()
         _server_instance.run()
     except Exception as e:
         click.echo(f"服务器启动失败: {e}", err=True)
         sys.exit(1)
+    finally:
+        if _server_instance:
+            _server_instance.stop()
+        _server_instance = None
 
 
 @cli.command()
@@ -197,21 +228,12 @@ def monitor(host, port, duration):
 
 
 @cli.command()
-def config():
-    """显示当前配置。"""
-    from .config import Config
-    
-    config = Config()
-    
-    click.echo("当前配置:")
-    click.echo(f"  主机地址: {config.host}")
-    click.echo(f"  端口: {config.port}")
-    click.echo(f"  调试模式: {config.debug}")
-    click.echo(f"  日志级别: {config.log_level}")
-    click.echo(f"  最大连接数: {config.max_connections}")
-    click.echo(f"  更新间隔: {config.update_interval}秒")
-    click.echo(f"  Tegrastats间隔: {config.tegrastats_interval}秒")
-    click.echo(f"  CORS源: {config.cors_origins}")
+@_config_options
+def config(**options):
+    """预览本次环境与参数对应的启动配置；未查询运行中的服务。"""
+    resolved = _resolve_config(options)
+    click.echo("本次环境与参数对应的启动配置；未查询运行中的服务：")
+    _show_config(resolved)
 
 
 def main():

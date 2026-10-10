@@ -1,0 +1,162 @@
+ * 格式：42["event_name", {...data...}]
+ */
+static void sio_handle_event_message(sio_connection_t *conn, const char *msg)
+{
+    if (!msg || strncmp(msg, SIO_EVENT_PREFIX, 2) != 0) {
+        return;
+    }
+
+    const char *json_start = strchr(msg, '[');
+    if (!json_start) return;
+
+    cJSON *array = cJSON_Parse(json_start);
+    if (!array || !cJSON_IsArray(array)) {
+        if (array) cJSON_Delete(array);
+        return;
+    }
+
+    cJSON *event_name = cJSON_GetArrayItem(array, 0);
+    cJSON *event_data = cJSON_GetArrayItem(array, 1);
+
+    if (!event_name || !cJSON_IsString(event_name)) {
+        cJSON_Delete(array);
+        return;
+    }
+
+    ESP_LOGD(TAG, "SIO event: %s from source %s", event_name->valuestring, conn->source_id);
+
+    // 查找关联的数据源
+    xSemaphoreTake(s_src_ctx.mutex, portMAX_DELAY);
+    int idx = find_source_index(conn->source_id);
+    if (idx >= 0) {
+        ts_auto_source_t *src = &s_src_ctx.sources[idx];
+
+        // 检查是否是我们订阅的事件
+        if (strcmp(event_name->valuestring, src->socketio.event) == 0 && event_data) {
+            ESP_LOGD(TAG, "Matched subscribed event '%s', updating source value...", event_name->valuestring);
+
+            // 更新源的 last_value
+            // 由于 str_val 只有 64 字节，存储摘要而非完整 JSON
+            char *json_str = cJSON_PrintUnformatted(event_data);
+            if (json_str) {
+                size_t json_len = strlen(json_str);
+                src->last_value.type = TS_AUTO_VAL_STRING;
+                
+                // 存储格式：前50字符... (总大小)
+                if (json_len > 50) {
+                    snprintf(src->last_value.str_val, sizeof(src->last_value.str_val),
+                             "%.45s...(%zu)", json_str, json_len);
+                } else {
+                    strncpy(src->last_value.str_val, json_str, sizeof(src->last_value.str_val) - 1);
+                    src->last_value.str_val[sizeof(src->last_value.str_val) - 1] = '\0';
+                }
+                ESP_LOGD(TAG, "Source '%s' last_value: %s", src->id, src->last_value.str_val);
+
+                // 处理数据到变量 - 所有处理都在主任务中执行，避免栈溢出
+                // （mapping 可能需要递归展开数组/对象，auto_discover 也是递归的）
+                if (src->mapping_count > 0 || src->auto_discover) {
+                    if (xSemaphoreTake(conn->pending_mutex, 0) == pdTRUE) {
+                        if (conn->pending_json) {
+                            free(conn->pending_json);  // 释放旧数据
+                        }
+                        conn->pending_json = json_str;  // 转移所有权
+                        json_str = NULL;
+                        xSemaphoreGive(conn->pending_mutex);
+                        ESP_LOGD(TAG, "SIO source '%s': queued JSON for processing", src->id);
+                    } else {
+                        ESP_LOGW(TAG, "SIO source '%s': pending mutex busy, dropping data", src->id);
+                    }
+                }
+                
+                if (json_str) free(json_str);
+            }
+
+            // 更新源状态
+            src->last_update_ms = esp_timer_get_time() / 1000;
+            src->connected = true;
+        }
+    }
+    xSemaphoreGive(s_src_ctx.mutex);
+
+    cJSON_Delete(array);
+}
+
+/**
+ * Socket.IO WebSocket 事件处理器
+ */
+static void sio_websocket_event_handler(void *arg, esp_event_base_t event_base,
+                                        int32_t event_id, void *event_data)
+{
+    sio_connection_t *conn = (sio_connection_t *)arg;
+    esp_websocket_event_data_t *data = (esp_websocket_event_data_t *)event_data;
+
+    switch (event_id) {
+        case WEBSOCKET_EVENT_CONNECTED:
+            ESP_LOGD(TAG, "SIO [%s] WebSocket connected, sending probe", conn->source_id);
+            conn->connected = true;
+            conn->last_message_ms = esp_timer_get_time() / 1000;
+            esp_websocket_client_send_text(conn->client, SIO_PROBE_MSG, strlen(SIO_PROBE_MSG), portMAX_DELAY);
+            break;
+
+        case WEBSOCKET_EVENT_DISCONNECTED:
+            ESP_LOGW(TAG, "SIO [%s] WebSocket disconnected", conn->source_id);
+            conn->connected = false;
+            conn->upgraded = false;
+            // 更新源状态
+            xSemaphoreTake(s_src_ctx.mutex, portMAX_DELAY);
+            int idx = find_source_index(conn->source_id);
+            if (idx >= 0) {
+                s_src_ctx.sources[idx].connected = false;
+            }
+            xSemaphoreGive(s_src_ctx.mutex);
+            break;
+
+        case WEBSOCKET_EVENT_DATA:
+            if (data->data_len > 0 && data->data_ptr) {
+                conn->last_message_ms = esp_timer_get_time() / 1000;
+
+                // 检查是否是分片消息
+                bool is_complete = (data->payload_len == 0) || 
+                                   (data->payload_offset + data->data_len >= data->payload_len);
+
+                // 如果是分片消息，需要缓冲
+                if (!is_complete || conn->msg_buf_len > 0) {
+                    // 分配或扩展缓冲区
+                    if (!conn->msg_buf) {
+                        conn->msg_buf = heap_caps_malloc(SIO_MSG_BUF_SIZE, MALLOC_CAP_SPIRAM);
+                        if (!conn->msg_buf) conn->msg_buf = malloc(SIO_MSG_BUF_SIZE);
+                        if (!conn->msg_buf) {
+                            ESP_LOGE(TAG, "SIO [%s] failed to alloc msg buffer", conn->source_id);
+                            break;
+                        }
+                        conn->msg_buf_len = 0;
+                    }
+
+                    // 追加数据到缓冲区
+                    size_t copy_len = data->data_len;
+                    if (conn->msg_buf_len + copy_len >= SIO_MSG_BUF_SIZE) {
+                        copy_len = SIO_MSG_BUF_SIZE - conn->msg_buf_len - 1;
+                        ESP_LOGW(TAG, "SIO [%s] msg buffer overflow, truncating", conn->source_id);
+                    }
+                    memcpy(conn->msg_buf + conn->msg_buf_len, data->data_ptr, copy_len);
+                    conn->msg_buf_len += copy_len;
+                    conn->msg_buf[conn->msg_buf_len] = '\0';
+
+                    ESP_LOGD(TAG, "SIO [%s] buffered %d bytes, total %zu", 
+                             conn->source_id, data->data_len, conn->msg_buf_len);
+
+                    if (!is_complete) {
+                        // 还有更多分片，等待
+                        break;
+                    }
+
+                    // 消息完整，处理缓冲区中的消息
+                    ESP_LOGD(TAG, "SIO [%s] complete msg: %zu bytes", conn->source_id, conn->msg_buf_len);
+                    
+                    // 处理事件消息
+                    if (strncmp(conn->msg_buf, SIO_EVENT_PREFIX, 2) == 0) {
+                        sio_handle_event_message(conn, conn->msg_buf);
+                    }
+
+                    // 清空缓冲区
+                    conn->msg_buf_len = 0;

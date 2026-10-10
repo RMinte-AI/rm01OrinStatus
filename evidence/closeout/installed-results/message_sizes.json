@@ -1,0 +1,21 @@
+{
+  "normal_before_bytes": 780,
+  "normal_after_bytes": 1136,
+  "representative": [
+    {
+      "limit": 4096,
+      "last_below_bytes": 4081,
+      "first_at_or_above_bytes": 4141,
+      "synthetic_rails": 50
+    },
+    {
+      "limit": 8192,
+      "last_below_bytes": 8160,
+      "first_at_or_above_bytes": 8219,
+      "synthetic_rails": 118
+    }
+  ],
+  "below_limit_fragment_replay_passed": true,
+  "over_limit_truncation_observed_in_host_replay": true,
+  "normal_increment_bytes": 356
+}

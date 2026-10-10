@@ -1,0 +1,61 @@
+{
+  "base_commit": "4a765acc2ffe2a46135851f7b225c2856336cb9f",
+  "before": {
+    "HEAD": "4a765acc2ffe2a46135851f7b225c2856336cb9f",
+    "before_sha256": {
+      "parser.py": "e2a38a59658fa309a881b1f94a8f6540aadb50332c4fefbf019ec8580c71843f",
+      "server.py": "e005fe62332fc79be6b352ea89b2e4738022562f57051aad13a537fc400bf679",
+      "cli.py": "28ec4fc0d2197fa6a9c1d0cb046e8af6b90acbfec86c9d0261b4e5064b25d097",
+      "config.py": "12fc67c8dd81792074d5fb3623659c65ecfbee404b8ba598f8a3ea7eac5e5307"
+    },
+    "previous_zip_sha256": "e0bc8a817129aaaecf3dcc8a6d8ca0f17157c6a68c41adff2bf8156717a9acc8",
+    "protected_worktree": "Preserved all prior uncommitted data/R1/R2 changes; saved prior artifacts. No reset/clean/git operations changing the checkout."
+  },
+  "final_sources": {
+    "src/tegrastats_api/server.py": "e005fe62332fc79be6b352ea89b2e4738022562f57051aad13a537fc400bf679",
+    "src/tegrastats_api/config.py": "e6caefcb7fa2303969008c9543d37cb6631159dd918eb25fbaa5c092d00c5912",
+    "src/tegrastats_api/__init__.py": "d01dde93910af328c3be3fffdf62504c482ab76e90a1f70b2bc8636d892a55bf",
+    "src/tegrastats_api/parser.py": "f5f3d51bbfbad72273ab9b58c1c8dc7a64d8db0176b514803a88957191785211",
+    "src/tegrastats_api/cli.py": "15c92964e877c8d08d132db6e2241c9eebc56b4a2e86a6f39d1403270ec7eb63",
+    "src/tegrastats_api/model_monitor.py": "50c1a42fc70be317832bb268e17a44751122be01fc2ba4be9a4a5c7004cf5f4f",
+    "src/tegrastats_api/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "current_wheel": {
+    "wheel_sha256": "b5f3520d1509a43601eed56fd00a81607581d3f41748d7a7e5c5352c0fd9677c",
+    "source_sha256": {
+      "parser.py": "f5f3d51bbfbad72273ab9b58c1c8dc7a64d8db0176b514803a88957191785211",
+      "server.py": "e005fe62332fc79be6b352ea89b2e4738022562f57051aad13a537fc400bf679",
+      "cli.py": "15c92964e877c8d08d132db6e2241c9eebc56b4a2e86a6f39d1403270ec7eb63",
+      "config.py": "e6caefcb7fa2303969008c9543d37cb6631159dd918eb25fbaa5c092d00c5912",
+      "model_monitor.py": "50c1a42fc70be317832bb268e17a44751122be01fc2ba4be9a4a5c7004cf5f4f",
+      "__init__.py": "d01dde93910af328c3be3fffdf62504c482ab76e90a1f70b2bc8636d892a55bf",
+      "py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "contents": [
+      "tegrastats_api/__init__.py",
+      "tegrastats_api/cli.py",
+      "tegrastats_api/config.py",
+      "tegrastats_api/model_monitor.py",
+      "tegrastats_api/parser.py",
+      "tegrastats_api/py.typed",
+      "tegrastats_api/server.py",
+      "tegrastats_api-1.0.1.dist-info/licenses/LICENSE",
+      "tegrastats_api-1.0.1.dist-info/METADATA",
+      "tegrastats_api-1.0.1.dist-info/WHEEL",
+      "tegrastats_api-1.0.1.dist-info/entry_points.txt",
+      "tegrastats_api-1.0.1.dist-info/top_level.txt",
+      "tegrastats_api-1.0.1.dist-info/RECORD"
+    ]
+  },
+  "original_regressions": 56,
+  "closeout_cases": 54,
+  "total_tests": 110,
+  "data_functions_ast_unchanged": [
+    "parse_line",
+    "get_snapshot",
+    "_accept_line"
+  ],
+  "server_bytes_unchanged_from_previous_candidate": true,
+  "hardware_executed": false,
+  "deployment_executed": false
+}

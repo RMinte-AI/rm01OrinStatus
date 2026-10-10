@@ -1,0 +1,11 @@
+{
+  "HEAD": "4a765acc2ffe2a46135851f7b225c2856336cb9f",
+  "before_sha256": {
+    "parser.py": "e2a38a59658fa309a881b1f94a8f6540aadb50332c4fefbf019ec8580c71843f",
+    "server.py": "e005fe62332fc79be6b352ea89b2e4738022562f57051aad13a537fc400bf679",
+    "cli.py": "28ec4fc0d2197fa6a9c1d0cb046e8af6b90acbfec86c9d0261b4e5064b25d097",
+    "config.py": "12fc67c8dd81792074d5fb3623659c65ecfbee404b8ba598f8a3ea7eac5e5307"
+  },
+  "previous_zip_sha256": "e0bc8a817129aaaecf3dcc8a6d8ca0f17157c6a68c41adff2bf8156717a9acc8",
+  "protected_worktree": "Preserved all prior uncommitted data/R1/R2 changes; saved prior artifacts. No reset/clean/git operations changing the checkout."
+}
