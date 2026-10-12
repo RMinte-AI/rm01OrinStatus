@@ -5,6 +5,7 @@ Main server module for Tegrastats API.
 import logging
 import threading
 import time
+import sys
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -18,6 +19,12 @@ from .model_monitor import ModelMonitor
 
 
 logger = logging.getLogger(__name__)
+
+
+def _has_primary_failure(error):
+    # A successful signal exit must not suppress a subsequent cleanup failure.
+    return error is not None and not (
+        isinstance(error, SystemExit) and error.code in (None, 0))
 
 
 class ConnectionLimiter:
@@ -108,7 +115,10 @@ class TegrastatsServer:
                 'service': 'tegrastats-api',
                 'timestamp': datetime.utcnow().isoformat() + 'Z',
                 'connected_clients': self.limiter.get_count(),
-                'telemetry_meta': self.parser.get_snapshot()[1]
+                'telemetry_meta': self.parser.get_snapshot()[1],
+                'capabilities': self.parser.capability_diagnostics(),
+                'package_version': __import__('tegrastats_api').__version__,
+                'parser_file': __import__('inspect').getfile(TegrastatsParser)
             })
         
         @self.app.route('/api/status', methods=['GET'])
@@ -283,7 +293,10 @@ class TegrastatsServer:
             
         except Exception as e:
             logger.error(f"启动服务器组件失败: {e}")
-            self.stop()
+            try:
+                self.stop()
+            except Exception:
+                logger.exception('Startup failed; component cleanup also failed')
             raise
         finally:
             self._shutdown_deferred = previous
@@ -307,14 +320,21 @@ class TegrastatsServer:
         
         # Stop data update thread
         self._running = False
-        if self._update_thread and self._update_thread.is_alive():
-            self._update_thread.join(timeout=2)
-        
-        # Stop parser
-        self.parser.stop()
-        
-        # Stop model monitor
-        self.model_monitor.stop()
+        errors = []
+        try:
+            if self._update_thread and self._update_thread.is_alive():
+                self._update_thread.join(timeout=2)
+        except Exception as error:
+            errors.append(error)
+            logger.exception('Update thread cleanup failed')
+        for name, stop in (('parser', self.parser.stop), ('model monitor', self.model_monitor.stop)):
+            try:
+                stop()
+            except Exception as error:
+                errors.append(error)
+                logger.exception('%s cleanup failed', name)
+        if errors:
+            raise errors[0]
         
         logger.info("服务器已关闭")
     
@@ -361,7 +381,13 @@ class TegrastatsServer:
             logger.error(f"服务器运行错误: {e}")
             raise
         finally:
-            self.stop()
+            failed = _has_primary_failure(sys.exc_info()[1])
+            try:
+                self.stop()
+            except Exception:
+                if not failed:
+                    raise
+                logger.exception('Run failed; cleanup also failed')
     
     def __enter__(self):
         """Context manager entry."""
@@ -370,4 +396,9 @@ class TegrastatsServer:
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
-        self.stop()
+        try:
+            self.stop()
+        except Exception:
+            if not _has_primary_failure(exc_val):
+                raise
+            logger.exception('Context failed; cleanup also failed')

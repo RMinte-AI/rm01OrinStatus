@@ -1,0 +1,107 @@
+{
+  "cpu": {
+    "cores": [
+      {
+        "freq": 1574,
+        "id": 0,
+        "usage": 3
+      },
+      {
+        "freq": 1574,
+        "id": 1,
+        "usage": 0
+      },
+      {
+        "freq": 1574,
+        "id": 2,
+        "usage": 0
+      },
+      {
+        "freq": 1574,
+        "id": 3,
+        "usage": 0
+      },
+      {
+        "freq": 1420,
+        "id": 4,
+        "usage": 2
+      },
+      {
+        "freq": 1420,
+        "id": 5,
+        "usage": 0
+      },
+      {
+        "freq": 1420,
+        "id": 6,
+        "usage": 0
+      },
+      {
+        "freq": 1420,
+        "id": 7,
+        "usage": 0
+      },
+      {
+        "freq": 729,
+        "id": 8,
+        "usage": 0
+      },
+      {
+        "freq": 729,
+        "id": 9,
+        "usage": 0
+      },
+      {
+        "freq": 729,
+        "id": 10,
+        "usage": 0
+      },
+      {
+        "freq": 729,
+        "id": 11,
+        "usage": 0
+      }
+    ]
+  },
+  "gpu": {
+    "gr3d_freq": 0
+  },
+  "memory": {
+    "ram": {
+      "total": 62841,
+      "unit": "MB",
+      "used": 1997
+    },
+    "swap": {
+      "cached": 0,
+      "total": 31421,
+      "unit": "MB",
+      "used": 0
+    }
+  },
+  "power": {
+    "vdd_cpu_cv": {
+      "average": 246,
+      "current": 246,
+      "unit": "mW"
+    },
+    "vdd_gpu_soc": {
+      "average": 2468,
+      "current": 2468,
+      "unit": "mW"
+    },
+    "vin_sys_5v0": {
+      "average": 3383,
+      "current": 3383,
+      "unit": "mW"
+    }
+  },
+  "temperature": {
+    "cpu": 45.75,
+    "soc0": 43.437,
+    "soc1": 44.281,
+    "soc2": 43.875,
+    "tj": 45.75
+  },
+  "timestamp": "2026-10-12T00:00:10Z"
+}

@@ -20,16 +20,20 @@ def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, default=root / 'rerun-results')
+    parser.add_argument('--wheel', type=Path, help='Explicit current candidate; default retains legacy replay')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    wheels = list((root / 'evidence/ws-data/wheel').glob('*.whl'))
+    wheels = [args.wheel.resolve()] if args.wheel else list((root / 'evidence/ws-data/wheel').glob('*.whl'))
     assert len(wheels) == 1, 'Exactly one candidate wheel required'
     wheel = wheels[0]
     with zipfile.ZipFile(wheel) as archive:
         identities = {}
-        for name in ('parser.py', 'server.py', 'cli.py', 'config.py',
-                     'model_monitor.py', '__init__.py', 'py.typed'):
+        names = ('parser.py', 'server.py', 'cli.py', 'config.py',
+                 'model_monitor.py', '__init__.py', 'py.typed')
+        if 'tegrastats_api/platform_gpu.py' in archive.namelist():
+            names += ('platform_gpu.py',)
+        for name in names:
             source = (root / 'src/tegrastats_api' / name).read_bytes()
             assert source == archive.read('tegrastats_api/' + name), 'Wheel/source mismatch'
             identities[name] = hashlib.sha256(source).hexdigest()
@@ -49,6 +53,17 @@ def main():
         env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
         subprocess.run([sys.executable, '-m', 'pytest', '-q', 'tests/offline',
                         '--junitxml=' + str(output / 'junit.xml')], check=True, cwd=clean, env=env)
+        frozen = root / 'evidence/orin-thor-service-closeout-20261012/fixtures'
+        if 'tegrastats_api/platform_gpu.py' in contents:
+            assert frozen.is_dir(), 'Current candidate requires frozen shared fixtures'
+            generated = clean / 'fixtures'
+            subprocess.run([sys.executable, 'tests/offline/export_contract_fixtures.py',
+                            '--output', str(generated)], check=True, cwd=clean, env=env)
+            for expected in frozen.glob('*.json'):
+                assert expected.read_bytes() == (generated / expected.name).read_bytes(), expected.name
+            (output/'fixtures_reproduced.json').write_text(json.dumps({
+                'all_frozen_files_equal': True,
+                'manifest_sha256': hashlib.sha256((frozen/'manifest.json').read_bytes()).hexdigest()}, indent=2))
         subprocess.run([sys.executable, 'tests/offline/verify_resources.py',
                         '--output', str(output)], check=True, cwd=clean, env=env)
         loaded = json.loads((output/'loaded_source.json').read_text())

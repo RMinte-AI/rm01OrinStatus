@@ -197,7 +197,10 @@ def test_reader_identical_noise_and_missing(collector):
     assert accept(p, "tj@46C")
     data, meta = p.get_snapshot()
     assert meta["sample_seq"] == 3
-    assert data["power"] == {} and data["gpu"] == {}
+    assert data["power"] == {}
+    # Additive uniform contract: missing measurement stays unavailable, never 0.
+    assert data["gpu"]["status"] == "unavailable" and data["gpu"]["utilization_pct"] is None
+    assert "gr3d_freq" not in data["gpu"]
     assert data["temperature"] == {"tj": 46.0}
     assert accept(p, "cpu@47C")
     assert "tj" not in p.get_current_status()["temperature"]
@@ -342,6 +345,13 @@ def test_http_baseline_normal_fields(collector):
         if "power" in before:
             before.pop("power")
             after.pop("power")
+        if "platform" in after:
+            assert after.pop("platform")["schema_version"] == 1
+        if "gpu" in before:
+            old_gpu = before["gpu"]
+            assert {k: after["gpu"][k] for k in old_gpu} == old_gpu
+            assert after["gpu"]["schema_version"] == 1
+            after["gpu"] = {k: after["gpu"][k] for k in old_gpu}
         assert before == after
 
 

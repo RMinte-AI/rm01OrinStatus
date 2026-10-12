@@ -1,0 +1,137 @@
+{
+  "cpu": {
+    "cores": [
+      {
+        "freq": 972,
+        "id": 0,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 1,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 2,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 3,
+        "usage": 2
+      },
+      {
+        "freq": 972,
+        "id": 4,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 5,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 6,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 7,
+        "usage": 0
+      },
+      {
+        "freq": 1566,
+        "id": 8,
+        "usage": 5
+      },
+      {
+        "freq": 1566,
+        "id": 9,
+        "usage": 2
+      },
+      {
+        "freq": 972,
+        "id": 10,
+        "usage": 0
+      },
+      {
+        "freq": 972,
+        "id": 11,
+        "usage": 1
+      }
+    ]
+  },
+  "gpu": {
+    "age_at_telemetry_receive_ms": 99.99999999999964,
+    "device_uuid": "GPU-synthetic-contract-fixture",
+    "freshness_timeout_ms": 5000,
+    "sample_interval_ms": 1000,
+    "sampled_at_utc": "2026-10-12T00:00:10Z",
+    "schema_version": 1,
+    "source": "nvml",
+    "status": "valid",
+    "utilization_pct": 37.5
+  },
+  "memory": {
+    "ram": {
+      "total": 125772,
+      "unit": "MB",
+      "used": 54074
+    },
+    "swap": {
+      "cached": 0,
+      "total": 2048,
+      "unit": "MB",
+      "used": 0
+    }
+  },
+  "platform": {
+    "compatible": [
+      "nvidia,tegra264"
+    ],
+    "family": "jetson_thor",
+    "gpu_backend": "nvml",
+    "identification_source": "device_tree_compatible",
+    "schema_version": 1,
+    "soc": "tegra264"
+  },
+  "power": {
+    "vdd_cpu_soc_mss": {
+      "average": 5952,
+      "current": 5952,
+      "unit": "mW"
+    },
+    "vdd_gpu": {
+      "average": 1984,
+      "current": 1984,
+      "unit": "mW"
+    },
+    "vin_sys_5v0": {
+      "average": 4492,
+      "current": 4492,
+      "unit": "mW"
+    }
+  },
+  "telemetry_meta": {
+    "collector_state": "running",
+    "fresh": true,
+    "freshness_timeout_ms": 9000,
+    "received_at": "2026-10-12T00:00:10Z",
+    "sample_age_ms": 0,
+    "sample_seq": 1,
+    "schema_version": 1,
+    "source_sample_interval_ms": 3000,
+    "stream_id": "db62fb94-a469-52de-9941-a6f85d932e0d",
+    "time_basis": "collector_receive"
+  },
+  "temperature": {
+    "cpu": 45.937,
+    "gpu": 46.406,
+    "soc012": 45.218,
+    "soc345": 45.125,
+    "tj": 46.406
+  },
+  "timestamp": "2026-10-12T00:00:10Z"
+}
