@@ -11,7 +11,7 @@
 
 ## Orin / Thor 候选 1.1.1
 
-平台由设备树自动识别；Thor通过可选官方NVML绑定读取GPU，Orin保留tegrastats路径。共同接口固定为 TTO-PLATFORM-CURVE-v2.0；TTO 0.2.0 的实施与验收由其独立会话负责。候选本轮只进行本地构建与离线验证，部署和源服务有效ExecStart另行核对。先读[候选安装与身份说明](docs/PLATFORM_TTO_V2.md)；下面的一键脚本会部署、启动服务，不属于离线验证入口。
+平台由设备树自动识别；Thor通过可选官方NVML绑定读取GPU，Orin保留tegrastats路径。共同接口固定为 TTO-PLATFORM-CURVE-v2.0。先读[候选安装与身份说明](docs/PLATFORM_TTO_V2.md)；下面的一键脚本会部署、启动服务，不属于离线验证入口。
 
 ## ⚡ 5分钟快速开始
 
