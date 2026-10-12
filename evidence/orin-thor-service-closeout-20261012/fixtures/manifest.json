@@ -1,0 +1,32 @@
+{
+  "consumer_only_negative_probes": [
+    "identity-conflict-platform.json",
+    "lifecycle-conflict-source-period.json"
+  ],
+  "contract": "TTO-PLATFORM-CURVE-v2.0",
+  "files": {
+    "identity-conflict-platform.json": "7dd3c3eafa5f4bb3891be87b726315451f5c044ef893e82483849e970e8f02cb",
+    "legacy-empty-gpu.json": "de95d27f6c4768d93a269f8353ea52b4d8aa560a2f8f371446bebc2eeafd4061",
+    "legacy-zero.json": "23b81523d7c95df99254d762ca617a8ec2faff8a606bf6c0d40c0be85888aa62",
+    "lifecycle-conflict-source-period.json": "3e048854340adba13b66245d78ae7c9b16ec8e6e38d533117cafe1010dcafe6d",
+    "orin-missing.json": "75295f71d1da52e0e220a88600e01062595b84c42ef0906f71dfe53c7de14a53",
+    "orin-nonzero.json": "be70028c1c1b0cc5d958f857e7ccded866744f04ccd2f22bae3ce6a31d052baf",
+    "orin-zero.json": "05b642f70f10e39a508e665f05c7409640f47c3bd2f0098092b68dabd52c7f42",
+    "thor-error-with-legacy-zero.json": "00385d737691d6feb3b0dbf6dc3a3d1b454353ea2fd8cbdeabfa05a390c9579c",
+    "thor-error.json": "1cb87abe49f7e97ebdd67e2fab64185edb5ff26acda145305c4fbc9e4fa83505",
+    "thor-nonzero.json": "a60716f087f692011d9beda86c0ecfa4f1b02a2856024e6cef99424731b5abf2",
+    "thor-repeat.json": "3fc92230747ddb04ea7fb2fe1159358d3dfadb9386d6298ec9c3340e2a67b7ed",
+    "thor-same-value-new-input.json": "60465b0048c3c069cebb6b6007f4902436ec41a7bbd7a832a4ff2ced4b65919e",
+    "thor-stale.json": "2048e7401bd3b990c5816d5ddbedd97545d2c36e415a2347e1791c50a80c702b",
+    "thor-unavailable.json": "ef94a81ad53fe88c0305cdd16302c3965e631ef23dd6bb32cfd8151389f0be88",
+    "thor-zero.json": "3fc92230747ddb04ea7fb2fe1159358d3dfadb9386d6298ec9c3340e2a67b7ed",
+    "unknown.json": "634a4456a187e9694e40d78c49f4ad3e86da6520079f7d81834542f28bb81ffc"
+  },
+  "legacy_compatibility": [
+    "legacy-zero.json",
+    "legacy-empty-gpu.json"
+  ],
+  "live_device_test": false,
+  "producer_version": "1.1.1",
+  "provenance": "Thor raw text retained from 20261012 device-install evidence; all GPU, platform and clocks synthetic"
+}

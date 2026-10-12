@@ -10,7 +10,8 @@ from typing import Optional
 import click
 
 from .config import Config, normalize_tegrastats_interval
-from .server import TegrastatsServer
+from .server import TegrastatsServer, _has_primary_failure
+from .platform_gpu import THOR_GPU_INTERVAL_MS
 
 
 # Global server instance for signal handling
@@ -74,6 +75,7 @@ def _show_config(config):
                              ("allow_unsafe_werkzeug", "allow_unsafe_werkzeug", "")):
         click.echo("%s：%s%s（来源：%s）" % (label, getattr(config, name), unit, config.sources[name]))
     click.echo("数据过期界限：%s ms" % config.freshness_timeout_ms)
+    click.echo("Thor GPU 调度周期：%s ms（独立默认；不改变源周期）" % THOR_GPU_INTERVAL_MS)
     click.echo("CORS：已配置，传入CORS/Socket.IO（来源：%s）" % config.sources['cors_origins'])
     click.echo("文件日志：未接线，不代表正在写文件（来源：%s）" % config.sources['log_file'])
 
@@ -110,9 +112,16 @@ def run(**options):
         click.echo(f"服务器启动失败: {e}", err=True)
         sys.exit(1)
     finally:
-        if _server_instance:
-            _server_instance.stop()
-        _server_instance = None
+        failed = _has_primary_failure(sys.exc_info()[1])
+        try:
+            if _server_instance:
+                _server_instance.stop()
+        except Exception:
+            if not failed:
+                raise
+            logging.getLogger(__name__).exception('CLI exit already pending; cleanup also failed')
+        finally:
+            _server_instance = None
 
 
 @cli.command()

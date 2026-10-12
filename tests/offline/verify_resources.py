@@ -20,6 +20,7 @@ import tracemalloc
 from tegrastats_api import TegrastatsParser
 import tegrastats_api.parser as production
 from socketio.packet import Packet, EVENT
+from export_contract_fixtures import build_cases
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -99,6 +100,12 @@ def main():
 
     sizes = {"normal_before_bytes": len(packet(before).encode()),
              "normal_after_bytes": len(packet(after).encode()), "representative": []}
+    contract_cases = build_cases()
+    sizes['platform_packets'] = {name: len(packet(body).encode()) for name, body in contract_cases.items()
+                               if name.startswith(('orin-', 'thor-'))}
+    # Legitimate platform packets retain historical TJ on the unmodified client.
+    sizes['platform_packet_max_bytes'] = max(sizes['platform_packets'].values())
+    assert sizes['platform_packet_max_bytes'] < 4096
     # Use legitimate synthetic rail names to stress current receiver capacity.
     for limit in (4096, 8192):
         last = None
@@ -143,11 +150,17 @@ def main():
         stale['telemetry_meta']['fresh'] = False
         stale['telemetry_meta']['collector_state'] = 'stopped'
         cases = [('before', before), ('after', after), ('stale', stale)]
+        cases += [(name, body) for name, body in contract_cases.items()
+                  if name in ('orin-zero', 'orin-nonzero', 'orin-missing', 'thor-zero',
+                              'thor-nonzero', 'thor-error', 'thor-unavailable', 'thor-stale', 'unknown')]
         for limit in (4096, 8192):
             cases.append(('near_%d' % limit, json.loads((out / ('near_%d.json' % limit)).read_text())))
         for label, body in cases:
             result = json.loads(subprocess.check_output([str(exe)], input=json.dumps(body).encode()))
-            assert result['compute_tj'] == result['mapped_tj'] == 45.75
+            # Original compute client stores float32; Thor's 46.406 is not
+            # exactly representable. JSONPath stays at the JSON double value.
+            assert abs(result['compute_tj'] - body['temperature']['tj']) < 1e-5
+            assert abs(result['mapped_tj'] - body['temperature']['tj']) < 1e-7
             # These historical mismatches existed before this change.
             assert result['cpu_core_count'] == result['ram_used'] == result['old_power_gpu_soc'] == 0
             client_results.append({"case": label, "result": result})
