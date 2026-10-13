@@ -70,7 +70,7 @@ check_requirements() {
     fi
     
     # 检查必要命令
-    local required_commands=("conda" "curl" "systemctl" "tegrastats")
+    local required_commands=("curl" "systemctl" "tegrastats")
     local missing_commands=()
     
     for cmd in "${required_commands[@]}"; do
@@ -98,28 +98,30 @@ check_requirements() {
 # 初始化conda
 init_conda() {
     log_step "初始化conda环境"
-    
-    # 检查conda是否已初始化
-    if [[ ! -f "$HOME/.bashrc" ]] || ! grep -q "conda initialize" "$HOME/.bashrc" 2>/dev/null; then
-        log_info "初始化conda..."
-        conda init bash
-        log_success "conda初始化完成"
-        log_warning "请运行 'source ~/.bashrc' 或重新打开终端后再次运行此脚本"
-        exit 0
+
+    # 优先使用PATH中的Conda；未加入PATH时查找常见的用户安装位置。
+    local conda_command
+    if ! conda_command=$(command -v conda); then
+        local prefix
+        for prefix in "$HOME/miniconda3" "$HOME/anaconda3" "$HOME/miniforge3"; do
+            if [[ -x "$prefix/bin/conda" ]]; then
+                conda_command="$prefix/bin/conda"
+                break
+            fi
+        done
     fi
-    
-    # 加载conda配置
-    if [[ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]]; then
-        source "$HOME/miniconda3/etc/profile.d/conda.sh"
-    elif [[ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]]; then
-        source "$HOME/anaconda3/etc/profile.d/conda.sh"
-    else
-        eval "$(conda shell.bash hook)" 2>/dev/null || {
-            log_error "无法加载conda配置"
-            exit 1
-        }
+    if [[ -z "$conda_command" ]]; then
+        log_error "未找到Conda，请安装Conda或将已有的conda命令加入PATH后重试"
+        exit 1
     fi
-    
+
+    # 仅加载到当前脚本，使conda activate可用，不修改用户的终端配置。
+    local conda_hook
+    if ! conda_hook=$("$conda_command" shell.bash hook) || ! eval "$conda_hook"; then
+        log_error "无法加载conda配置"
+        exit 1
+    fi
+
     log_success "conda环境已加载"
 }
 

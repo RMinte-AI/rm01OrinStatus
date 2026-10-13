@@ -17,7 +17,7 @@ Example:
     $ tegrastats-api --host 0.0.0.0 --port 58090
 """
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 __author__ = "Tegrastats API Team"
 __email__ = "contact@example.com"
 __license__ = "MIT"
