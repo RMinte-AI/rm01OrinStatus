@@ -17,7 +17,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/thomas-hiddenpeak/rm01OrinStatus.git
+git clone https://github.com/RMinte-AI/rm01OrinStatus.git
 cd rm01OrinStatus
 
 # 一键安装 (自动创建conda环境、安装依赖、配置服务)
