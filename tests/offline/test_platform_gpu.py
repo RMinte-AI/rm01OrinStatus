@@ -156,7 +156,7 @@ def test_thor_http_and_socketio_same_sealed_measurement(monkeypatch):
         assert events and events[-1]['gpu']==http['gpu'] and events[-1]['platform']==http['platform']
         assert events[-1]['telemetry_meta']['sample_seq']==http['telemetry_meta']['sample_seq']==1
         health = server.app.test_client().get('/api/health').json
-        assert health['package_version']=='1.1.1' and health['capabilities']['platform']==platform('thor')
+        assert health['package_version']=='1.1.2' and health['capabilities']['platform']==platform('thor')
         record('thor-contract', http)
     finally:
         client.disconnect();p.stop()

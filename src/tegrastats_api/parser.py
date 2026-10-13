@@ -417,8 +417,10 @@ class TegrastatsParser:
                     "unit": "MB"
                 }
             
-            # Parse temperature information
-            temp_matches = re.findall(r'(?:^|\s)(\w+)@(-?\d+(?:\.\d+)?)C(?=\s|$)', line)
+            # Newer tegrastats adds a maximum temperature; keep the current value.
+            temp_matches = re.findall(
+                r'(?:^|\s)(\w+)@(-?\d+(?:\.\d+)?)C'
+                r'(?:/-?\d+(?:\.\d+)?C)?(?=\s|$)', line)
             for sensor, temp in temp_matches:
                 result["temperature"][sensor.lower()] = float(temp)
             
@@ -429,8 +431,10 @@ class TegrastatsParser:
                 component = match.group(1).lower()
                 remainder = line[match.end():].split()
                 token = remainder[0] if remainder else ""
-                values = re.fullmatch(r'(\d+)(mW)?/(\d+)(mW)?', token)
-                if not values or values.group(2) != values.group(4):
+                # Current / average, optionally followed by the maximum.
+                values = re.fullmatch(r'(\d+)(mW)?/(\d+)(mW)?(?:/(\d+)(mW)?)?', token)
+                if (not values or values.group(2) != values.group(4)
+                        or (values.group(5) is not None and values.group(2) != values.group(6))):
                     invalid.add(component)
                     continue
                 value = {"current": int(values.group(1)),
